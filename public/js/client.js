@@ -4,27 +4,35 @@ var Promise = TrelloPowerUp.Promise;
 
 var GRAY_ICON = 'https://cdn.hyperdev.com/us-east-1%3A3d31b21c-01a0-4da2-8827-4bc6e88b7618%2Ficon-gray.svg';
   
-var getBadges = function(trello){
-  var badgeEmergency = {
-      dynamic: function(){
-        //return trello.card('all').get('name').then(function(name)
-        return trello.get('card', 'shared', 'emergency').then(function(emergencyLevel)
-        {
-          return {
-          title: 'Emergency', 
-          text: emergencyLevel,
-          icon: GRAY_ICON, 
-          color: 'red',
-          refresh: 30 
-        };
+var COLOR_FOR_EMERGENCY = {'ice':'yellow','vanilla':'orange','smoothie':'lime','medium':'sky','spicy':'red'};
 
-        });
-      }
-    };
+var prepareEmergencyBadge = function(trello)
+{
+  var emergencyBadge = {
+    dynamic: function(){
+       //return trello.card('all').get('name').then(function(name)
+      return trello.get('card', 'shared', 'emergency').then(function(emergencyLevel)
+      {
+        return {
+        title: 'Emergency', 
+        text: emergencyLevel,
+        icon: 'https://cdn.hyperdev.com/us-east-1%3Acba180f4-ee65-4dfc-8dd5-f143280d3c10%2Fdiamond.svg', 
+        color: COLOR_FOR_EMERGENCY[emergencyLevel],
+        refresh: 30 
+        };
+      });
+    }
+  };
+
+  return emergencyBadge;
+}
+
+
+var getBadges = function(trello){
   
   return trello.card('name').get('name').then(function(cardName)
   {
-    return [badgeEmergency];
+    return [prepareEmergencyBadge(trello)];
   });
 };
 
@@ -97,17 +105,6 @@ function constructEmergencyBoard(trello)
     }
     return listeCartes;
   });
-}
-
-var prepareEmergencyBadge = function(emergencyLevel)
-{
-  var emergencyBadge = {
-      title: emergencyLevel, 
-      text: emergencyLevel,
-      icon: 'https://cdn.hyperdev.com/us-east-1%3A3d31b21c-01a0-4da2-8827-4bc6e88b7618%2Fhyperdev.svg', 
-      color: null
-    };
-  return emergencyBadge;
 }
 
 var writeEmergencyChoice = function(trello, choice){
