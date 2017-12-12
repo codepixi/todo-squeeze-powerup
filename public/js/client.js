@@ -18,7 +18,7 @@ var prepareEmergencyBadge = function(trello)
         text: emergencyLevel,
         icon: 'https://cdn.hyperdev.com/us-east-1%3Acba180f4-ee65-4dfc-8dd5-f143280d3c10%2Fdiamond.svg', 
         color: COLOR_FOR_EMERGENCY[emergencyLevel],
-        refresh: 30 
+        //refresh: 30 
         };
       });
     }
@@ -81,29 +81,53 @@ function get(url) {
   });
 }
 
+var emergencyCards = {};
 
 function constructEmergencyBoard(trello)
 {
   console.log("constructEmergencyBoard()");
-  //https://github.com/rooreynolds/trello-show/issues/1
   var readAllCards = function()
   {   
     return trello.cards("all");
-    //var url = 'https://api.trello.com/1/boards/LNRU7QUR/cards?key=&token=';
-    //get(url);
   };
-
-  readAllCards().then(function(cartes)
+  
+  return readAllCards()
+  .then(function(cardList)
   {
-    var listeCartes = [];
-
-    for(var carteId in cartes)
+    for(var cardId in cardList)
     {
-      var carte = cartes[carteId];
-      console.log(carte['name']);
-      listeCartes[carte['id']] = carte;
+      var card = cardList[cardId];
+      //console.log("card : " + card.name + ' ' + card.emergency);
+      
+      // https://stackoverflow.com/questions/17244614/passing-variable-to-promise-in-a-loop
+      (function(card){
+        
+      trello.get(card.id, 'shared', 'emergency').then(function(emergencyLevel)
+      {
+        if(emergencyLevel == 'spicy')
+        {
+          emergencyCards[card.id] = card;
+          //console.log(card.name + ' emergency : ' + emergencyLevel);
+        }
+        else
+        {
+          delete emergencyCards[card.id];
+        }
+      });
+        
+      })(card);
     }
-    return listeCartes;
+    
+    return emergencyCards;
+  })
+  .then(function(emergencyCards)
+  {
+    for(var emergencyId in emergencyCards)
+    {
+      var emergency = emergencyCards[emergencyId];
+      console.log('Emergency card : ~~~ ' + emergency.name);      
+    }
+    return emergencyCards;  
   });
 }
 
@@ -114,18 +138,20 @@ var writeEmergencyChoice = function(trello, choice){
     return trello.card('all').then(function (card) 
     { 
       console.log(choice);console.log(card.name);
-      //var emergencyBadge = prepareEmergencyBadge(choice);
-      //card.badges.length
       //card.badges["emergency"] = emergencyBadge;
-      //console.log(JSON.stringify(card.badges));
-      //console.log(JSON.stringify(card));
-      //console.log("nombre de badges " + card.badges.length);
       trello.set('card', 'shared', 'emergency', choice);
       //console.log('Registered emergency level : ' + trello.get('card', 'shared', 'emergency'));
       trello.get('card', 'shared', 'emergency').then(function(emergencyLevel){console.log('Registered emergency level : ' + emergencyLevel)});
+      
+      constructEmergencyBoard(trello).then(function(emergencyList){});
+      
       trello.closePopup();
     });
+    
+    
   } 
+  
+  
   return trello.closePopup();
 }
 
