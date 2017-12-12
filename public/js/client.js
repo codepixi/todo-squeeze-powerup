@@ -5,9 +5,26 @@ var Promise = TrelloPowerUp.Promise;
 var GRAY_ICON = 'https://cdn.hyperdev.com/us-east-1%3A3d31b21c-01a0-4da2-8827-4bc6e88b7618%2Ficon-gray.svg';
   
 var getBadges = function(trello){
-  return trello.card('name').get('name').then(function(cardName){
-    console.log('We just loaded the card name for fun: ' + cardName);
-    return [];
+  var badgeEmergency = {
+      dynamic: function(){
+        //return trello.card('all').get('name').then(function(name)
+        return trello.get('card', 'shared', 'emergency').then(function(emergencyLevel)
+        {
+          return {
+          title: 'Emergency', 
+          text: emergencyLevel,
+          icon: GRAY_ICON, 
+          color: 'red',
+          refresh: 30 
+        };
+
+        });
+      }
+    };
+  
+  return trello.card('name').get('name').then(function(cardName)
+  {
+    return [badgeEmergency];
   });
 };
 
@@ -82,16 +99,35 @@ function constructEmergencyBoard(trello)
   });
 }
 
-var writeEmergencyChoice = function(trello, choix){
+var prepareEmergencyBadge = function(emergencyLevel)
+{
+  var emergencyBadge = {
+      title: emergencyLevel, 
+      text: emergencyLevel,
+      icon: 'https://cdn.hyperdev.com/us-east-1%3A3d31b21c-01a0-4da2-8827-4bc6e88b7618%2Fhyperdev.svg', 
+      color: null
+    };
+  return emergencyBadge;
+}
+
+var writeEmergencyChoice = function(trello, choice){
   if (trello.memberCanWriteToModel('card')){
     //return trello.attach({ url:nameForItem, name: nameForItem }).then(function(){ return trello.closePopup();});
     //return trello.card('all').then(function (card) { console.log(JSON.stringify(card, null, 2));});
     return trello.card('all').then(function (card) 
     { 
-      console.log(choix);console.log(card.name);
-      console.log(card.badges);
-      trello.closePopup();}
-    );
+      console.log(choice);console.log(card.name);
+      //var emergencyBadge = prepareEmergencyBadge(choice);
+      //card.badges.length
+      //card.badges["emergency"] = emergencyBadge;
+      //console.log(JSON.stringify(card.badges));
+      //console.log(JSON.stringify(card));
+      //console.log("nombre de badges " + card.badges.length);
+      trello.set('card', 'shared', 'emergency', choice);
+      //console.log('Registered emergency level : ' + trello.get('card', 'shared', 'emergency'));
+      trello.get('card', 'shared', 'emergency').then(function(emergencyLevel){console.log('Registered emergency level : ' + emergencyLevel)});
+      trello.closePopup();
+    });
   } 
   return trello.closePopup();
 }
