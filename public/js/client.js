@@ -119,20 +119,12 @@ function constructEmergencyBoard(trello)
     }
     
     return emergencyCards;
-  })
-  .then(function(emergencyCards)
-  {
-    for(var emergencyId in emergencyCards)
-    {
-      var emergency = emergencyCards[emergencyId];
-      console.log('Emergency card : ~~~ ' + emergency.name);      
-    }
-    return emergencyCards;  
   });
 }
 
 var writeEmergencyChoice = function(trello, choice){
-  if (trello.memberCanWriteToModel('card')){
+  console.log('writeEmergencyChoice()');
+  //if (trello.memberCanWriteToModel('card')){
     //return trello.attach({ url:nameForItem, name: nameForItem }).then(function(){ return trello.closePopup();});
     //return trello.card('all').then(function (card) { console.log(JSON.stringify(card, null, 2));});
     return trello.card('all').then(function (card) 
@@ -143,15 +135,20 @@ var writeEmergencyChoice = function(trello, choice){
       //console.log('Registered emergency level : ' + trello.get('card', 'shared', 'emergency'));
       trello.get('card', 'shared', 'emergency').then(function(emergencyLevel){console.log('Registered emergency level : ' + emergencyLevel)});
       
-      constructEmergencyBoard(trello).then(function(emergencyList){});
+      constructEmergencyBoard(trello).then(function(emergencyList)
+      {
+        console.log('Iterating in emergency list');
+        for(var emergencyId in emergencyList)
+        {
+          var emergency = emergencyList[emergencyId];
+          console.log('Emergency : ~~~ ' + emergency.name + ' ~~~ '); 
+        }
+
+      });
       
       trello.closePopup();
     });
-    
-    
-  } 
-  
-  
+  //} 
   return trello.closePopup();
 }
 
