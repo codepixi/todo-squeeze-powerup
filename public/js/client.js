@@ -93,7 +93,7 @@ function constructEmergencyBoard(trello)
       pos: "top", 
       idBoard :'EaCl5utu'
     };
-    window.Trello.post('/cards/', newCard, manageSuccess, manageError);
+    //window.Trello.post('/cards/', newCard, manageSuccess, manageError);
     
     return emergencyCards;
   });
