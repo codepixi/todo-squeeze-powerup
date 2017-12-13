@@ -1,5 +1,8 @@
 /* global TrelloPowerUp */
 
+
+// https://trello.com/c/1jf9wbWC/2-ask-a-question
+
 var Promise = TrelloPowerUp.Promise;
 
 var GRAY_ICON = 'https://cdn.hyperdev.com/us-east-1%3A3d31b21c-01a0-4da2-8827-4bc6e88b7618%2Ficon-gray.svg';
@@ -46,41 +49,6 @@ var authorize = function(trello, options){
     });
   };
 
-function get(url) {
-  return fetch(url).then(response => {
-    if (response.ok) {
-      const contentType = response.headers.get('Content-Type') || '';
-
-      if (contentType.includes('application/json')) {
-        return response.json().catch(error => {
-          return Promise.reject(new Error('Invalid JSON: ' + error.message));
-        });
-      }
-
-      if (contentType.includes('text/html')) {
-        return response.text().then(html => {
-          return {
-            page_type: 'generic',
-            html: html
-          };
-        }).catch(error => {
-          return Promise.reject(new Error('HTML error: ' + error.message));
-        })
-      }
-
-      return Promise.reject(new Error('Invalid content type: ' + contentType));
-    }
-
-    if (response.status == 404) {
-      return Promise.reject(new Error('Page not found: ' + url));
-    }
-
-    return Promise.reject(new Error('HTTP error: ' + response.status));
-  }).catch(error => {
-    return Promise.reject(new Error(error.message));
-  });
-}
-
 var emergencyCards = {};
 
 function constructEmergencyBoard(trello)
@@ -118,9 +86,21 @@ function constructEmergencyBoard(trello)
       })(card);
     }
     
+    var newCard = 
+    {
+      name: "test", 
+      desc: "test",
+      pos: "top", 
+      idBoard :'EaCl5utu'
+    };
+    window.Trello.post('/cards/', newCard, manageSuccess, manageError);
+    
     return emergencyCards;
   });
 }
+
+var manageSuccess = function(successMsg) { /* your actions on success case */}
+var manageError= function(errorMsg) { /* your actions on error case */}
 
 var writeEmergencyChoice = function(trello, choice){
   console.log('writeEmergencyChoice()');
